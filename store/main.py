@@ -98,7 +98,7 @@ class ProcessedAgentData(BaseModel):
 
 
 # WebSocket subscriptions
-subscriptions: Dict[int, Set[WebSocket]] = {}
+subscriptions = set()
 
 
 # FastAPI WebSocket endpoint
@@ -108,14 +108,19 @@ async def websocket_endpoint(websocket: WebSocket):
     subscriptions.add(websocket)
     try:
         while True:
+            # Pмушуєм сервер чекати повідомлень і не закривати з'єднання
             await websocket.receive_text()
     except WebSocketDisconnect:
         subscriptions.remove(websocket)
 
-# Function to send data to subscribed users
 async def send_data_to_subscribers(data):
+    # data - це ВЖЕ список словників (json), тому нам не треба їх конвертувати ще раз!
     for websocket in subscriptions:
-        await websocket.send_json(json.dumps(data))
+        try:
+            # Просто відправляємо готові дані
+            await websocket.send_json(data)
+        except Exception as e:
+            print(f"Failed to send data to websocket: {e}")
 
 
 # FastAPI CRUDL endpoints

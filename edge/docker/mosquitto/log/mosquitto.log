@@ -1,0 +1,20 @@
+1774984040: mosquitto version 2.1.2 starting
+1774984040: Config loaded from /mosquitto/config/mosquitto.conf.
+1774984040: Bridge support available.
+1774984040: Persistence support available.
+1774984040: TLS support available.
+1774984040: TLS-PSK support available.
+1774984040: Websockets support available.
+1774984040: Opening ipv4 listen socket on port 1883.
+1774984040: Opening ipv6 listen socket on port 1883.
+1774984040: mosquitto version 2.1.2 running
+1774984040: New connection from 172.19.0.3:52017 on port 1883.
+1774984040: New client connected from 172.19.0.3:52017 as auto-08F94D14-60EF-0911-96FD-C0A7037E6B20 (p4, c1, k60).
+1774984040: New connection from 172.19.0.3:46943 on port 1883.
+1774984040: New client connected from 172.19.0.3:46943 as auto-5CB7B5C1-C860-82C0-50E8-DDED72621569 (p4, c1, k60).
+1774984103: New connection from 172.19.0.1:33056 on port 1883.
+1774984103: New client connected from 172.19.0.1:33056 as mqtt-explorer-9080c7e2 (p4, c1, k60).
+1774984483: Client auto-5CB7B5C1-C860-82C0-50E8-DDED72621569 [172.19.0.3:46943] disconnected: connection closed by client.
+1774984483: Client auto-08F94D14-60EF-0911-96FD-C0A7037E6B20 [172.19.0.3:52017] disconnected: connection closed by client.
+1774984483: mosquitto version 2.1.2 terminating
+1774984483: Saving in-memory database to /mosquitto/data//mosquitto.db.

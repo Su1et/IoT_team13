@@ -10,7 +10,7 @@ from config import STORE_HOST, STORE_PORT
 # Pydantic models
 class ProcessedAgentData(BaseModel):
     road_state: str
-    user_id: int
+    user_id: int = 1 # Додано дефолтне значення, щоб не було помилок валідації
     x: float
     y: float
     z: float
@@ -40,42 +40,49 @@ class Datasource:
         asyncio.ensure_future(self.connect_to_server())
 
     def get_new_points(self):
-        Logger.debug(self._new_points)
         points = self._new_points
         self._new_points = []
         return points
 
     async def connect_to_server(self):
-        uri = f"ws://{STORE_HOST}:{STORE_PORT}/ws/{self.user_id}"
+        # ВИПРАВЛЕНО: Правильний шлях до WebSocket (згідно з Store API)
+        uri = f"ws://{STORE_HOST}:{STORE_PORT}/ws/"
         while True:
-            Logger.debug("CONNECT TO SERVER")
-            async with websockets.connect(uri) as websocket:
-                self.connection_status = "Connected"
-                try:
+            Logger.info(f"CONNECTING TO SERVER: {uri}")
+            try:
+                async with websockets.connect(uri) as websocket:
+                    self.connection_status = "Connected"
+                    Logger.info("SUCCESSFULLY CONNECTED TO STORE WEBSOCKET!")
                     while True:
                         data = await websocket.recv()
                         parsed_data = json.loads(data)
                         self.handle_received_data(parsed_data)
-                except websockets.ConnectionClosedOK:
-                    self.connection_status = "Disconnected"
-                    Logger.debug("SERVER DISCONNECT")
+            except websockets.ConnectionClosedOK:
+                self.connection_status = "Disconnected"
+                Logger.info("SERVER DISCONNECT")
+            except Exception as e:
+                Logger.error(f"WEBSOCKET ERROR: {e}")
+                await asyncio.sleep(2) # Затримка перед перепідключенням
 
     def handle_received_data(self, data):
-        # Update your UI or perform actions with received data here
-        Logger.debug(f"Received data: {data}")
-        processed_agent_data_list = sorted(
-            [
-                ProcessedAgentData(**processed_data_json)
-                for processed_data_json in json.loads(data)
-            ],
-            key=lambda v: v.timestamp,
-        )
-        new_points = [
-            (
-                processed_agent_data.latitude,
-                processed_agent_data.longitude,
-                processed_agent_data.road_state,
+        # ВИПРАВЛЕНО: data - це вже розпарсений список, не робимо json.loads(data) вдруге
+        try:
+            processed_agent_data_list = sorted(
+                [
+                    ProcessedAgentData(**processed_data_json)
+                    for processed_data_json in data
+                ],
+                key=lambda v: v.timestamp,
             )
-            for processed_agent_data in processed_agent_data_list
-        ]
-        self._new_points.extend(new_points)
+            new_points = [
+                (
+                    processed_agent_data.latitude,
+                    processed_agent_data.longitude,
+                    processed_agent_data.road_state,
+                )
+                for processed_agent_data in processed_agent_data_list
+            ]
+            self._new_points.extend(new_points)
+            Logger.info(f"Received and processed {len(new_points)} new points!")
+        except Exception as e:
+            Logger.error(f"Error processing data: {e}")
