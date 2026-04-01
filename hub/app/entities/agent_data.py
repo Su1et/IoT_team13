@@ -13,9 +13,15 @@ class GpsData(BaseModel):
     longitude: float
 
 
+class ObdData(BaseModel):
+    speed: float
+    rpm: float
+
+
 class AgentData(BaseModel):
     accelerometer: AccelerometerData
     gps: GpsData
+    obd: ObdData
     timestamp: datetime
 
     @classmethod

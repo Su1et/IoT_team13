@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: 'Road Monitoring'
+    orgId: 1
+    folder: 'City Administration'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards

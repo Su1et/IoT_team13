@@ -40,11 +40,14 @@ processed_agent_data = Table(
     metadata,
     Column("id", Integer, primary_key=True, index=True),
     Column("road_state", String),
+    Column("severity", Float),
     Column("x", Float),
     Column("y", Float),
     Column("z", Float),
     Column("latitude", Float),
     Column("longitude", Float),
+    Column("speed", Float),
+    Column("rpm", Float),
     Column("timestamp", DateTime),
 )
 SessionLocal = sessionmaker(bind=engine)
@@ -54,11 +57,14 @@ SessionLocal = sessionmaker(bind=engine)
 class ProcessedAgentDataInDB(BaseModel):
     id: int
     road_state: str
+    severity: float
     x: float
     y: float
     z: float
     latitude: float
     longitude: float
+    speed: float
+    rpm: float
     timestamp: datetime
 
 
@@ -73,10 +79,14 @@ class GpsData(BaseModel):
     latitude: float
     longitude: float
 
+class ObdData(BaseModel):
+    speed: float
+    rpm: float
 
 class AgentData(BaseModel):
     accelerometer: AccelerometerData
     gps: GpsData
+    obd: ObdData
     timestamp: datetime
 
     @classmethod
@@ -94,6 +104,7 @@ class AgentData(BaseModel):
 
 class ProcessedAgentData(BaseModel):
     road_state: str
+    severity: float
     agent_data: AgentData
 
 
@@ -129,11 +140,14 @@ def map_row_to_model(row) -> ProcessedAgentDataInDB:
     return ProcessedAgentDataInDB(
         id=row.id,
         road_state=row.road_state,
+        severity=row.severity,
         x=row.x,
         y=row.y,
         z=row.z,
         latitude=row.latitude,
         longitude=row.longitude,
+        speed=row.speed,
+        rpm=row.rpm,
         timestamp=row.timestamp,
     )
 
@@ -148,11 +162,14 @@ async def create_processed_agent_data(data: List[ProcessedAgentData]):
                 insert(processed_agent_data)
                 .values(
                     road_state=item.road_state,
+                    severity=item.severity,
                     x=item.agent_data.accelerometer.x,
                     y=item.agent_data.accelerometer.y,
                     z=item.agent_data.accelerometer.z,
                     latitude=item.agent_data.gps.latitude,
                     longitude=item.agent_data.gps.longitude,
+                    speed=10.0,
+                    rpm=3000.0,
                     timestamp=item.agent_data.timestamp,
                 )
                 .returning(*processed_agent_data.c)
@@ -213,11 +230,14 @@ def update_processed_agent_data(processed_agent_data_id: int, data: ProcessedAge
             .where(processed_agent_data.c.id == processed_agent_data_id)
             .values(
                 road_state=data.road_state,
+                severity=data.severity,
                 x=data.agent_data.accelerometer.x,
                 y=data.agent_data.accelerometer.y,
                 z=data.agent_data.accelerometer.z,
                 latitude=data.agent_data.gps.latitude,
                 longitude=data.agent_data.gps.longitude,
+                speed=data.agent_data.obd.speed,
+                rpm=data.agent_data.obd.rpm,
                 timestamp=data.agent_data.timestamp,
             )
             .returning(*processed_agent_data.c)

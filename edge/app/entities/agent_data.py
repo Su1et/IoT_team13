@@ -13,13 +13,19 @@ class GpsData(BaseModel):
     longitude: float
 
 
+class ObdData(BaseModel):
+    speed: float
+    rpm: float
+
+
 class AgentData(BaseModel):
     accelerometer: AccelerometerData
     gps: GpsData
+    obd: ObdData
     timestamp: datetime
 
     @classmethod
-    @field_validator("timestamp", mode="before")
+    @field_validator('timestamp', mode='before')
     def parse_timestamp(cls, value):
         # Convert the timestamp to a datetime object
         if isinstance(value, datetime):

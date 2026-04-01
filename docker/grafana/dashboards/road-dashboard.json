@@ -1,0 +1,256 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Total Incidents",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT COUNT(*) AS total FROM processed_agent_data WHERE road_state != 'normal' AND $__timeFilter(timestamp)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Average Severity",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(severity)::numeric, 2) AS avg_severity FROM processed_agent_data WHERE road_state != 'normal' AND $__timeFilter(timestamp)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3 },
+              { "color": "red", "value": 7 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Average Speed at Incidents",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(speed)::numeric, 1) AS avg_speed FROM processed_agent_data WHERE road_state != 'normal' AND $__timeFilter(timestamp)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocitykmh",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 40 },
+              { "color": "red", "value": 60 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Average RPM",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT ROUND(AVG(rpm)::numeric, 0) AS avg_rpm FROM processed_agent_data WHERE $__timeFilter(timestamp)",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "rpm",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3000 },
+              { "color": "red", "value": 5000 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Road State Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT road_state, COUNT(*) AS count FROM processed_agent_data WHERE $__timeFilter(timestamp) GROUP BY road_state ORDER BY count DESC",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "right" },
+        "pieType": "pie"
+      }
+    },
+    {
+      "title": "Severity Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS time, severity FROM processed_agent_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10
+          }
+        }
+      }
+    },
+    {
+      "title": "Speed & RPM Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS time, speed FROM processed_agent_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+          "refId": "Speed"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS time, rpm / 100 AS rpm_scaled FROM processed_agent_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+          "refId": "RPM"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "lineWidth": 2 }
+        }
+      }
+    },
+    {
+      "title": "Accelerometer Activity (Vibration Intensity)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT timestamp AS time, SQRT(x*x + y*y + z*z) AS vibration FROM processed_agent_data WHERE $__timeFilter(timestamp) ORDER BY timestamp",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "orange", "mode": "fixed" },
+          "custom": { "lineWidth": 1, "fillOpacity": 20 }
+        }
+      }
+    },
+    {
+      "title": "Incidents by Hour of Day",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT EXTRACT(HOUR FROM timestamp) AS hour, COUNT(*) AS incidents FROM processed_agent_data WHERE road_state != 'normal' AND $__timeFilter(timestamp) GROUP BY hour ORDER BY hour",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "xField": "hour"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "title": "Recent Incidents Log",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "PostgreSQL" },
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT timestamp AS time, road_state, ROUND(severity::numeric, 2) AS severity, ROUND(speed::numeric, 1) AS speed_kmh, ROUND(latitude::numeric, 5) AS lat, ROUND(longitude::numeric, 5) AS lon FROM processed_agent_data WHERE road_state != 'normal' AND $__timeFilter(timestamp) ORDER BY timestamp DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["smart-city", "iot"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "title": "City Road Administration",
+  "uid": "road_monitoring_001"
+}

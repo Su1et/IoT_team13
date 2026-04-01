@@ -4,4 +4,5 @@ from app.entities.agent_data import AgentData
 
 class ProcessedAgentData(BaseModel):
     road_state: str
+    severity: float
     agent_data: AgentData
