@@ -2,7 +2,7 @@ from paho.mqtt import client as mqtt_client
 import json
 import time
 from schema.aggregated_data_schema import AggregatedDataSchema
-from file_datasource import FileDatasource
+from obd_datasource import EnhancedDatasource
 import config
 
 
@@ -44,7 +44,7 @@ def run():
     # Prepare mqtt client
     client = connect_mqtt(config.MQTT_BROKER_HOST, config.MQTT_BROKER_PORT)
     # Prepare datasource
-    datasource = FileDatasource("data/accelerometer.csv", "data/gps.csv")
+    datasource = EnhancedDatasource("data/accelerometer.csv", "data/gps.csv")
     # Infinity publish data
     publish(client, config.MQTT_TOPIC, datasource, config.DELAY)
 
